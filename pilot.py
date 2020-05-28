@@ -117,31 +117,46 @@ class PILTest_interference_adv():
         self.im_size = np.array((700, 300))
 
         self.wall_pos = 20
-        self.wall_width = 0
+        self.wall_width = 4
         
-        self.slit_width = 10
+        self.slit_width = 6
         
-        self.slit_sep = 40
+        self.slit_sep = 100
+        
+        self.slit_pos_top = (self.wall_pos, (self.im_size[1] / 2) - (self.slit_sep / 2))
+        self.slit_pos_bot = (self.wall_pos, (self.im_size[1] / 2) + (self.slit_sep / 2))
         
         self.num_sources = 10
 
         self.low_threshold = 0
         self.high_threshold = 1
 
-        self.wavelength = 3
+        self.wavelength = 6
+        
+        self.amplitude = 1
 
         self.incoming_domain = (0, 0, self.wall_pos, self.im_size[1])
         self.interference_domain = (self.wall_pos + self.wall_width, 0, self.im_size[0], self.im_size[1])
 
-        self.plane_wave = PlaneWave(self.wavelength, self.incoming_domain, np.array([0.0, 1.0]))
+        self.plane_wave = PlaneWave(self.wavelength, self.amplitude, self.incoming_domain, np.array([0.0, 1.0]))
         
-        self.slit_1 = SlitSource((self.wall_pos + self.wall_width, (self.im_size[1] / 2) - (self.slit_sep / 2)), self.slit_width, self.num_sources, self.wavelength, self.interference_domain)
-        self.slit_2 = SlitSource((self.wall_pos + self.wall_width, (self.im_size[1] / 2) + (self.slit_sep / 2)), self.slit_width, self.num_sources, self.wavelength, self.interference_domain)
+        self.slit_1 = SlitSource(self.slit_pos_top, self.slit_width, self.num_sources, self.wavelength, self.amplitude/2, self.interference_domain)
+        self.slit_2 = SlitSource(self.slit_pos_bot, self.slit_width, self.num_sources, self.wavelength, self.amplitude/2, self.interference_domain)
+
+    def draw_superficial_barrier(self, domain, data):
+        x0 = int(domain[0])
+        y0 = int(domain[1])
+        width = int(domain[3] - y0)
+        height = int(domain[2] - x0)
+        
+        for x in range(height):
+            for y in range(width):
+                data[y0 + y, x0 + x, :] = 1
 
     def run(self):
         d_data = []
         
-        # d_data.append((self.incoming_domain, self.plane_wave.get_wave_data()))
+        d_data.append((self.incoming_domain, self.plane_wave.get_wave_data()))
         
         d_data.append((self.interference_domain, self.slit_1.get_wave_data() + self.slit_2.get_wave_data()))
         
@@ -171,10 +186,14 @@ class PILTest_interference_adv():
                         data[y0 + y, x0 + x, 2] = -val
 
             print("=="*30)
+        
+        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, 0, self.wall_pos + self.wall_width/2, self.slit_pos_top[1] - self.slit_width/2), data)
+        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_top[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.slit_pos_bot[1] - self.slit_width/2), data)
+        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_bot[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.im_size[1]), data)
 
         data = norm(data)
-        data[data < self.low_threshold] = 0
-        data[data > self.high_threshold] = 1
+        # data[data < self.low_threshold] = 0
+        # data[data > self.high_threshold] = 1
         
         data *= 255
         

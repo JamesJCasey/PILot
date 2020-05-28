@@ -10,15 +10,16 @@ import numpy as np
 from WaveSource import WaveSource
 
 class SlitSource():
-    def __init__(self, pos, width, num_sources, wavelength, domain):
+    def __init__(self, pos, width, num_sources, wavelength, amplitude, domain):
         self.sources = []
+        self.amplitude = amplitude
         
         start_pos = pos - np.array([0, width / 2])
         
         sep = width / (num_sources + 1)
         
         for i in range(num_sources):
-            self.sources.append(WaveSource(start_pos + [0, sep * i], wavelength, domain, 1.0 / num_sources))
+            self.sources.append(WaveSource(start_pos + [0, sep * i], wavelength, domain, amplitude / num_sources))
         
     def get_wave_data(self):
         res = []

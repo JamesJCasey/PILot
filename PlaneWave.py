@@ -8,9 +8,11 @@ Created on Thu May 28 11:46:37 2020
 import numpy as np
 
 class PlaneWave():
-    def __init__(self, wavelength, domain, direction):
+    def __init__(self, wavelength, amplitude, domain, direction):
         self.wavelength = wavelength
         self.domain = domain
+        
+        self.amplitude = amplitude
         
         self.direction = direction / np.sqrt(np.sum(direction**2))
         
@@ -22,5 +24,5 @@ class PlaneWave():
         self.x_mesh, self.y_mesh = np.meshgrid(x, y)
 
     def get_wave_data(self):
-        data = 2 * np.cos(2 * np.pi/self.wavelength * (self.direction[0]*self.y_mesh + self.direction[1]*self.x_mesh))
+        data = self.amplitude * np.cos(2 * np.pi/self.wavelength * (self.direction[0]*self.y_mesh + self.direction[1]*self.x_mesh))
         return data
