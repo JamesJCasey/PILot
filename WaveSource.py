@@ -15,7 +15,7 @@ class WaveSource():
         self.domain = domain
         self.amplitude = amplitude
         
-        x_min, y_min, x_max, y_max = self.domain
+        x_min, y_min, x_max, y_max = self.domain.getBounds()
         
         x = np.arange(x_min, x_max, dtype=np.float64)
         y = np.arange(y_min, y_max, dtype=np.float64)

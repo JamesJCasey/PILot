@@ -5,6 +5,8 @@ from PIL import Image
 from WaveSource import WaveSource
 from PlaneWave import PlaneWave
 from SlitSource import SlitSource
+from Domain import Domain
+from Canvas import Canvas
 
 import numpy as np
 
@@ -46,15 +48,15 @@ class PILTest_interference():
         self.low_threshold = 0
         self.high_threshold = 1
 
-        self.wavelength = 3
+        self.wavelength = 6
 
         self.incoming_domain = (0, 0, self.wall_pos, self.im_size[1])
         self.interference_domain = (self.wall_pos + self.wall_width, 0, self.im_size[0], self.im_size[1])
 
-        self.plane_wave = PlaneWave(self.wavelength, self.incoming_domain, np.array([0.0, 1.0]))
-
-        self.source_1 = WaveSource((self.wall_pos + self.wall_width, 130), self.wavelength, self.interference_domain)
-        self.source_2 = WaveSource((self.wall_pos + self.wall_width, 170), self.wavelength, self.interference_domain)
+        self.plane_wave = PlaneWave(self.wavelength, 1, self.incoming_domain, np.array([1.0, 0.0]))
+        
+        self.source_1 = WaveSource((self.wall_pos + self.wall_width, 100), self.wavelength, self.interference_domain, 0.5)
+        self.source_2 = WaveSource((self.wall_pos + self.wall_width, 200), self.wavelength, self.interference_domain, 0.5)
 
     def run(self):
         slit1wavedata = self.source_1.get_wave_data()
@@ -115,6 +117,10 @@ class PILTest_interference():
 class PILTest_interference_adv():
     def __init__(self):
         self.im_size = np.array((700, 300))
+        
+        self.canvas = Canvas(*self.im_size)
+        
+        self.im_domain = Domain(0, 0, self.im_size[0], self.im_size[1])
 
         self.wall_pos = 20
         self.wall_width = 4
@@ -134,11 +140,14 @@ class PILTest_interference_adv():
         self.wavelength = 6
         
         self.amplitude = 1
+        
+        self.image_domain = Domain(0, 0, *self.im_size)
 
-        self.incoming_domain = (0, 0, self.wall_pos, self.im_size[1])
-        self.interference_domain = (self.wall_pos + self.wall_width, 0, self.im_size[0], self.im_size[1])
+        # self.incoming_domain = (0, 0, self.wall_pos, self.im_size[1])
+        # self.interference_domain = (self.wall_pos + self.wall_width, 0, self.im_size[0], self.im_size[1])
+        self.incoming_domain, self.interference_domain = self.image_domain.split_vertical(self.wall_pos)
 
-        self.plane_wave = PlaneWave(self.wavelength, self.amplitude, self.incoming_domain, np.array([0.0, 1.0]))
+        self.plane_wave = PlaneWave(self.wavelength, self.amplitude, self.incoming_domain, np.array([1.0, 0.0]))
         
         self.slit_1 = SlitSource(self.slit_pos_top, self.slit_width, self.num_sources, self.wavelength, self.amplitude/2, self.interference_domain)
         self.slit_2 = SlitSource(self.slit_pos_bot, self.slit_width, self.num_sources, self.wavelength, self.amplitude/2, self.interference_domain)
@@ -146,12 +155,14 @@ class PILTest_interference_adv():
     def draw_superficial_barrier(self, domain, data):
         x0 = int(domain[0])
         y0 = int(domain[1])
-        width = int(domain[3] - y0)
-        height = int(domain[2] - x0)
+        self.canvas.drawData(np.fill(domain.shape, 1), x0, y0)
         
-        for x in range(height):
-            for y in range(width):
-                data[y0 + y, x0 + x, :] = 1
+        # width = int(domain[3] - y0)
+        # height = int(domain[2] - x0)
+        
+        # for x in range(height):
+        #     for y in range(width):
+        #         data[y0 + y, x0 + x, :] = 1
 
     def run(self):
         d_data = []
@@ -160,10 +171,11 @@ class PILTest_interference_adv():
         
         d_data.append((self.interference_domain, self.slit_1.get_wave_data() + self.slit_2.get_wave_data()))
         
-        data = np.zeros((self.im_size[1], self.im_size[0], 3))
+        visual_data = np.zeros((self.im_size[1], self.im_size[0], 3))
+        overlay_data = np.zeros((self.im_size[1], self.im_size[0], 3))
         
         for d in d_data:
-            domain = d[0]
+            domain = d[0].getBounds()
             datum = d[1]
             
             x0 = domain[0]
@@ -181,25 +193,28 @@ class PILTest_interference_adv():
                 for y in range(width):
                     val = datum[y, x]
                     if val >= 0:
-                        data[y0 + y, x0 + x, 0] = val
+                        visual_data[y0 + y, x0 + x, 0] = val
                     if val < 0:
-                        data[y0 + y, x0 + x, 2] = -val
+                        visual_data[y0 + y, x0 + x, 2] = -val
 
             print("=="*30)
         
-        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, 0, self.wall_pos + self.wall_width/2, self.slit_pos_top[1] - self.slit_width/2), data)
-        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_top[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.slit_pos_bot[1] - self.slit_width/2), data)
-        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_bot[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.im_size[1]), data)
-
-        data = norm(data)
+        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, 0, self.wall_pos + self.wall_width/2, self.slit_pos_top[1] - self.slit_width/2), overlay_data)
+        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_top[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.slit_pos_bot[1] - self.slit_width/2), overlay_data)
+        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_bot[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.im_size[1]), overlay_data)
+        
+        self.im_domain.draw_domain(overlay_data)
+        
+        visual_data = norm(visual_data) * 255
+        overlay_data = norm(overlay_data) * 255
         # data[data < self.low_threshold] = 0
         # data[data > self.high_threshold] = 1
         
-        data *= 255
+        image_data = visual_data + overlay_data
         
-        im = Image.fromarray(data.astype(np.uint8))
+        im = Image.fromarray(self.canvas.getData().astype(np.uint8))
         im.save(f"test_interference_adv.png")
         im.show()
 
-# PILTest_dist().run()
+# PILTest_interference().run()
 PILTest_interference_adv().run()
