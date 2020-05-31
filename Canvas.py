@@ -13,13 +13,13 @@ class Canvas():
         self.width = canv_width
         self.height = canv_height
         
-        self.canv_data = np.zeros((self.width, self.height, 3))
+        self.canv_data = np.zeros((self.height, self.width, 3))
     
     def getData(self):
-        return self.canvas_data
+        return self.canv_data
     
-    def drawData(self, data, x0, y0):
-        width, height = data.shape
+    def drawData(self, data, domain):
+        x0, y0, width, height = domain.getBounds()
         
         for x in range(height):
             for y in range(width):

@@ -12,6 +12,8 @@ class Domain():
         self.xmax = xmax
         self.ymax = ymax
         
+        self.shape = (self.xmax - self.xmin, self.ymax - self.ymin)
+        
         self.subdomains = []
         
     def split_vertical(self, xpos):

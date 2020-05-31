@@ -153,9 +153,7 @@ class PILTest_interference_adv():
         self.slit_2 = SlitSource(self.slit_pos_bot, self.slit_width, self.num_sources, self.wavelength, self.amplitude/2, self.interference_domain)
 
     def draw_superficial_barrier(self, domain, data):
-        x0 = int(domain[0])
-        y0 = int(domain[1])
-        self.canvas.drawData(np.fill(domain.shape, 1), x0, y0)
+        self.canvas.drawData(np.full(domain.shape, 1), domain)
         
         # width = int(domain[3] - y0)
         # height = int(domain[2] - x0)
@@ -199,9 +197,9 @@ class PILTest_interference_adv():
 
             print("=="*30)
         
-        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, 0, self.wall_pos + self.wall_width/2, self.slit_pos_top[1] - self.slit_width/2), overlay_data)
-        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_top[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.slit_pos_bot[1] - self.slit_width/2), overlay_data)
-        self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_bot[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.im_size[1]), overlay_data)
+        # self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, 0, self.wall_pos + self.wall_width/2, self.slit_pos_top[1] - self.slit_width/2), overlay_data)
+        # self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_top[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.slit_pos_bot[1] - self.slit_width/2), overlay_data)
+        # self.draw_superficial_barrier((self.wall_pos-self.wall_width/2, self.slit_pos_bot[1] + self.slit_width/2, self.wall_pos + self.wall_width/2, self.im_size[1]), overlay_data)
         
         self.im_domain.draw_domain(overlay_data)
         
@@ -212,7 +210,9 @@ class PILTest_interference_adv():
         
         image_data = visual_data + overlay_data
         
-        im = Image.fromarray(self.canvas.getData().astype(np.uint8))
+        #self.canvas.getData()
+        
+        im = Image.fromarray(image_data.astype(np.uint8))
         im.save(f"test_interference_adv.png")
         im.show()
 
