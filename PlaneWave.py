@@ -21,8 +21,7 @@ class PlaneWave():
         x = np.arange(x_min, x_max)
         y = np.arange(y_min, y_max)
         
-        self.x_mesh, self.y_mesh = np.meshgrid(x, y)
+        self.x_mesh, self.y_mesh = np.meshgrid(x, y, indexing="ij")
 
     def get_wave_data(self):
-        data = self.amplitude * np.cos(2 * np.pi/self.wavelength * (self.direction[0]*self.x_mesh + self.direction[1]*self.y_mesh))
-        return data
+        return self.amplitude * np.cos(2 * np.pi/self.wavelength * (self.direction[0]*self.x_mesh + self.direction[1]*self.y_mesh))

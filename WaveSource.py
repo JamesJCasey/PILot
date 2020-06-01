@@ -23,7 +23,7 @@ class WaveSource():
         x -= self.pos[0]
         y -= self.pos[1]
         
-        self.x_mesh, self.y_mesh = np.meshgrid(x, y)
+        self.x_mesh, self.y_mesh = np.meshgrid(x, y, indexing="ij")
 
     def get_wave_data(self):
         data = self.amplitude * np.cos(2 * np.pi/self.wavelength * np.sqrt(self.x_mesh**2 + self.y_mesh**2))
