@@ -26,12 +26,12 @@ class Canvas():
     def getDomain(self):
         return self.image_domain
 
-    def drawData(self, data, domain):
+    def drawData(self, data, domain, colour=...):
         x0, y0, width, height = domain.getDrawBounds()
         
         for x in range(width):
             for y in range(height):
-                self.canv_data[x0 + x, y0 + y] = data[x, y]
+                self.canv_data[x0 + x, y0 + y, colour] = data[x, y]
                 
         self.clip()
     
@@ -44,5 +44,5 @@ class Canvas():
     def __add__(self, other):
         assert other.canv_data.shape == self.canv_data.shape
         
-        self.canv_data += other.canv_data
+        self.canv_data = (self.canv_data + other.canv_data) / 2
         self.clip()

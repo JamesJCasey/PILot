@@ -12,6 +12,9 @@ class Domain():
         self.xmax = int(xmax)
         self.ymax = int(ymax)
         
+        self.width = self.xmax - self.xmin
+        self.height = self.ymax - self.ymin
+        
         self.shape = (self.xmax - self.xmin, self.ymax - self.ymin)
         
         self.subdomains = []
@@ -31,10 +34,10 @@ class Domain():
         return self.xmin, self.ymin, self.xmax, self.ymax
     
     def getDrawBounds(self):
-        return self.xmin, self.ymin, self.xmax - self.xmin, self.ymax - self.ymin
+        return self.xmin, self.ymin, self.width, self.height
     
     def getSize(self):
-        return self.xmax - self.xmin, self.ymax - self.ymin
+        return self.width, self.height
 
     def getPosition(self):
         return self.xmin, self.ymin

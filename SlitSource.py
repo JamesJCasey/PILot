@@ -13,6 +13,12 @@ class SlitSource():
     def __init__(self, pos, width, num_sources, wavelength, amplitude, domain):
         self.sources = []
         self.amplitude = amplitude
+        self.num_sources = num_sources
+        self.wavelength = wavelength
+        self.amplitude = amplitude
+        self.domain = domain
+        self.pos = pos
+        self.width = width
         
         start_pos = pos - np.array([0, width / 2])
         
